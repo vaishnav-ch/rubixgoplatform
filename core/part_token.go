@@ -20,7 +20,7 @@ func (c *Core) relaseToken(release *bool, token string) {
 }
 
 func round(num float64) int {
-	return int(num + math.Copysign(0.5, num))
+	return int(math.Ceil(num))
 }
 
 func floatPrecision(num float64, precision int) float64 {
@@ -157,9 +157,17 @@ func (c *Core) createPartToken(dc did.DIDCrypto, did string, tkn string, parts [
 
 	// check part split not crossing RBT
 	amount := float64(0)
+	fmt.Println("Parts struct is ", parts)
 	for i := range parts {
 		amount = amount + parts[i]
+		fmt.Println("Amount before floatPrecision is ", amount)
 		amount = floatPrecision(amount, 10)
+		fmt.Println("amount is ", amount)
+		fmt.Println("token value is ", t.TokenValue)
+		diff1 := amount - t.TokenValue
+		diff2 := t.TokenValue - amount
+		fmt.Println("Amount - token value is ", diff1)
+		fmt.Println("token value - Amount is ", diff2)
 		if amount > t.TokenValue {
 			return nil, fmt.Errorf("invalid part split, split sum is more than the parent token")
 		}
