@@ -840,11 +840,12 @@ func (c *Core) initPledgeQuorumToken(cr *ConensusRequest, p *ipfsport.Peer, qt i
 		}
 
 		pledgeTokensPerQuorum := pd.TransferAmount / float64(MinQuorumRequired)
+		pledgeTokensPerQuorumPresize := floatPrecision(pledgeTokensPerQuorum, 3)
 
 		// Request pledage token
-		if pd.RemPledgeTokens != 0 {
+		if pd.RemPledgeTokens > 0 {
 			pr := PledgeRequest{
-				TokensRequired: pledgeTokensPerQuorum, // Request the determined number of tokens per quorum
+				TokensRequired: pledgeTokensPerQuorumPresize, // Request the determined number of tokens per quorum
 			}
 			// l := len(pd.PledgedTokens)
 			// for i := pd.NumPledgedTokens; i < l; i++ {
@@ -862,6 +863,7 @@ func (c *Core) initPledgeQuorumToken(cr *ConensusRequest, p *ipfsport.Peer, qt i
 				did := p.GetPeerDID()
 				pd.PledgedTokens[did] = make([]string, 0)
 				for i, t := range prs.Tokens {
+					fmt.Println("Remaining amount to pledge are ", pd.RemPledgeTokens)
 					ptcb := block.InitBlock(prs.TokenChainBlock[i], nil)
 					if !c.checkIsPledged(ptcb) {
 						pd.NumPledgedTokens++
@@ -891,7 +893,7 @@ func (c *Core) initPledgeQuorumToken(cr *ConensusRequest, p *ipfsport.Peer, qt i
 			return err
 		}
 
-		if pd.RemPledgeTokens == 0 {
+		if pd.RemPledgeTokens <= 0 {
 			return nil
 		} else if count == 300 {
 			c.log.Error("Unable to pledge token")
